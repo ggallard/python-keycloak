@@ -270,6 +270,19 @@ class KeycloakAdmin:
         data_raw = self.raw_get(URL_ADMIN_REALMS)
         return raise_error_from_response(data_raw, KeycloakGetError)
 
+    def get_realm(self):
+        """
+        Return realm
+
+        RealmRepresentation:
+        https://www.keycloak.org/docs-api/8.0/rest-api/index.html#_realmrepresentation
+
+        :return: Keycloak server response (RealmRepresentation)
+        """
+        params_path = {"realm-name": self.realm_name}
+        data_raw = self.raw_get(URL_ADMIN_REALM.format(**params_path))
+        return raise_error_from_response(data_raw, KeycloakGetError)
+
     def create_realm(self, payload, skip_exists=False):
         """
         Create a realm
@@ -1571,6 +1584,21 @@ class KeycloakAdmin:
         params_path = {"realm-name": self.realm_name, "scope-id": client_scope_id}
         data_raw = self.raw_get(URL_ADMIN_CLIENT_SCOPE.format(**params_path))
         return raise_error_from_response(data_raw, KeycloakGetError)
+
+    def get_client_scope_id(self, client_scope_name):
+        """
+        Get internal keycloak client id from clientScope.
+        This is required for further actions against this clientScope.
+
+        :param client_scope_name: name in ClientScopeRepresentation
+        https://www.keycloak.org/docs-api/8.0/rest-api/index.html#_clientscoperepresentation
+        :return: client_scope_id (uuid as string)
+        """
+
+        for client_scope in self.get_client_scopes():
+            if client_scope_name == client_scope['name']:
+                return client_scope["id"]
+        return None
 
     def create_client_scope(self, payload, skip_exists=False):
         """
